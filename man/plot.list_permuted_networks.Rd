@@ -7,7 +7,9 @@
 \method{plot}{list_permuted_networks}(
   x,
   species_original_network,
-  network_metrics = c("density", "mean_strength", "diameter", "transitivity"),
+  network_metrics_functions_list = c(edge_density = function(x) igraph::edge_density(x),
+    diameter = function(x) igraph::diameter(x, weights = NA), transitivity = function(x)
+    igraph::transitivity(x)),
   ...
 )
 }
@@ -16,8 +18,8 @@
 
 \item{species_original_network}{An igraph object which is the original network}
 
-\item{network_metrics}{A vector depicting names of global network metrics. This should be supplied as a character vector and the values 
-should be chosen from "mean_strength", "density", "diameter", "transitivity". (default = c("mean_strength", "density", "diameter", "transitivity")).}
+\item{network_metrics_functions_list}{A list consisting of function definitions of the network metrics that the user wants to evaluate. Each element in the list should have an assigned name.
+Default = c("edge_density" = function(x) igraph::edge_density(x), "diameter" = function(x) igraph::diameter(x, weights = NA), "transitivity" = function(x) igraph::transitivity(x))}
 
 \item{...}{Further arguments are ignored.}
 }

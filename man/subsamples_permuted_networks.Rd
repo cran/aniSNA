@@ -7,7 +7,9 @@
 subsamples_permuted_networks(
   networks_list,
   subsampling_proportion = c(0.1, 0.3, 0.5, 0.7, 0.9),
-  network_metrics = c("density", "mean_strength", "diameter", "transitivity")
+  network_metrics_functions_list = c(edge_density = function(x) igraph::edge_density(x),
+    diameter = function(x) igraph::diameter(x, weights = NA), transitivity = function(x)
+    igraph::transitivity(x))
 )
 }
 \arguments{
@@ -15,7 +17,8 @@ subsamples_permuted_networks(
 
 \item{subsampling_proportion}{A vector depicting the levels (in proportion) at which subsamples to be taken}
 
-\item{network_metrics}{A vector depicting names of global network metrics. Default = network_metrics = c("density", "mean_strength", "diameter", "transitivity")}
+\item{network_metrics_functions_list}{A list consisting of function definitions of the network metrics that the user wants to evaluate. Each element in the list should have an assigned name.
+Default = c("edge_density" = function(x) igraph::edge_density(x), "diameter" = function(x) igraph::diameter(x, weights = NA), "transitivity" = function(x) igraph::transitivity(x))}
 }
 \value{
 A list of network metrics of class "Subsampled_Permuted_Network_Metrics". Each element of list is a matrix whose columns 
@@ -28,6 +31,7 @@ To generate subsamples of the permuted networks and obtain network metrics of th
 \examples{
 \donttest{
 data(elk_2010_permutations)
-subsamples_permuted_networks(elk_2010_permutations)
+elk_subsamples_permuted_networks <- subsamples_permuted_networks(elk_2010_permutations)
+plot(elk_subsamples_permuted_networks, elk_network_2010)
 }
 }

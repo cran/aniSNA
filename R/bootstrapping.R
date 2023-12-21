@@ -1,13 +1,13 @@
 
-#' To obtain bootstrapped versions of a network 
+#' To obtain bootstrapped versions of a network's adjacency matrix
 #'
 #' @param network An igraph object
 #' @param n_nodes Number of nodes to be selected in bootstrapped versions (default : All nodes)
 #' @param n_versions Number of bootstrapped versions required
 #' @param seed seed number
 #'
-#' @return A list of class bootstrapped_pvalue_matrix consisting of two elements. The first element contains the original network 
-#'         and the second element contains bootstrapped versions.
+#' @return A list of class bootstrapped_pvalue_matrix consisting of two elements. The first element contains the adjacency matrix of the original network 
+#'         and the second element contains bootstrapped versions of the adjacency matrices.
 #' @export
 #'
 #' @examples
@@ -32,36 +32,40 @@ obtain_bootstrapped_samples <- function(network, n_nodes = igraph::gorder(networ
 #' To obtain two non-overlapping bootstrapped versions and obtain p-values for the significance of difference between them
 #'
 #' @param network An igraph object
-#' @param n_versions Number of bootstrapped versions to be used
+#' @param n_versions Number of bootstrapped versions to be used (default = 1000)
 #' @param seed seed number 
 #' @param n.iter Number of iterations at each level
-#' @param network_metrics Network metrics to be evaluated. This should be supplied as a character vector and the values 
-#' should be chosen from "mean_degree", "mean_strength", "density", "diameter", "transitivity". (default = c("mean_degree", "mean_strength", "density", "diameter", "transitivity")).
+#' @param network_metrics_functions_list A list consisting of function definitions of the network metrics that the user wants to evaluate. Each element in the list should have an assigned name.
+#'  Default = c("edge_density" = function(x) igraph::edge_density(x), "diameter" = function(x) igraph::diameter(x, weights = NA), "transitivity" = function(x) igraph::transitivity(x))
 #'
-#' @return A matrix of p-values whose rows correspond to the sub-sample size and columns correspond to the chosen network metric.
+#' @return A matrix of p-values whose rows correspond to the sub-sample size and columns correspond to the chosen network metric. The sub-sample size values (corresponding to rows) 
+#' occur in multiples of 5 and range from 5 to a maximum of half the number of nodes in the network
 #' @export
 #'
 #' @examples
 #' \donttest{
 #' data(elk_network_2010)
-#' bootstrapped_difference_pvalues(elk_network_2010, n_versions = 100)
+#' mean_pvalue_matrix <- bootstrapped_difference_pvalues(elk_network_2010, n_versions = 100)
+#' plot(mean_pvalue_matrix)
 #' }
 bootstrapped_difference_pvalues <- function(network, 
-                                   n_versions = 1000, 
-                                   seed = 12345, 
-                                   n.iter = 10, 
-                                   network_metrics = c("mean_degree", "mean_strength", "density", "diameter", "transitivity")){
+                                            n_versions = 1000, 
+                                            seed = 12345, 
+                                            n.iter = 10, 
+                                            network_metrics_functions_list = c("edge_density" = function(x) igraph::edge_density(x),
+                                                                               "diameter" = function(x) igraph::diameter(x, weights = NA),
+                                                                               "transitivity" = function(x) igraph::transitivity(x))){
   
   subsample_size <- 5*(1:floor(floor(igraph::gorder(network)/2)/5))
   
-  mean_metrics_pvalue <- matrix(NA, nrow = length(subsample_size), ncol = length(network_metrics))
+  mean_metrics_pvalue <- matrix(NA, nrow = length(subsample_size), ncol = length(network_metrics_functions_list))
   
   for(i in 1:length(subsample_size)){
-    metrics_pvalue <- p_value_matrix(network, size_subnet = subsample_size[i], n.iter, network_metrics, n_versions)
+    metrics_pvalue <- p_value_matrix(network, size_subnet = subsample_size[i], n.iter, network_metrics_functions_list, n_versions)
     mean_value <- apply(metrics_pvalue, 2, mean, na.rm=TRUE)
     mean_metrics_pvalue[i,] <- mean_value
   }
-  colnames(mean_metrics_pvalue) <- network_metrics
+  colnames(mean_metrics_pvalue) <- names(network_metrics_functions_list)
   rownames(mean_metrics_pvalue) <- as.character(5*(1:floor(floor(igraph::gorder(network)/2)/5)))
   
   class(mean_metrics_pvalue) = "bootstrapped_pvalue_matrix"

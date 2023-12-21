@@ -2,7 +2,7 @@
 % Please edit documentation in R/bootstrapping.R
 \name{obtain_bootstrapped_samples}
 \alias{obtain_bootstrapped_samples}
-\title{To obtain bootstrapped versions of a network}
+\title{To obtain bootstrapped versions of a network's adjacency matrix}
 \usage{
 obtain_bootstrapped_samples(
   network,
@@ -21,11 +21,11 @@ obtain_bootstrapped_samples(
 \item{seed}{seed number}
 }
 \value{
-A list of class bootstrapped_pvalue_matrix consisting of two elements. The first element contains the original network 
-        and the second element contains bootstrapped versions.
+A list of class bootstrapped_pvalue_matrix consisting of two elements. The first element contains the adjacency matrix of the original network 
+        and the second element contains bootstrapped versions of the adjacency matrices.
 }
 \description{
-To obtain bootstrapped versions of a network
+To obtain bootstrapped versions of a network's adjacency matrix
 }
 \examples{
 data(elk_network_2010)

@@ -4,12 +4,30 @@
 \alias{plot.Subsampled_Permuted_Network_Metrics}
 \title{To plot sub-sampling results of the original network and permuted networks}
 \usage{
-\method{plot}{Subsampled_Permuted_Network_Metrics}(x, network, ...)
+\method{plot}{Subsampled_Permuted_Network_Metrics}(
+  x,
+  network,
+  n_simulations = 100,
+  subsampling_proportion = c(0.1, 0.3, 0.5, 0.7, 0.9),
+  network_metrics_functions_list = c(edge_density = function(x) igraph::edge_density(x),
+    diameter = function(x) igraph::diameter(x, weights = NA), transitivity = function(x)
+    igraph::transitivity(x)),
+  ...
+)
 }
 \arguments{
 \item{x}{A list of matrices obtained from subsamples_permuted_networks function of class "Subsampled_Permuted_Network_Metrics"}
 
 \item{network}{An igraph graph object consisting of observed network}
+
+\item{n_simulations}{For subsampling results of original network, this determines the number of sub-samples to be obtained at each level}
+
+\item{subsampling_proportion}{A vector depicting the levels (in proportion) at which subsamples to be taken. This parameter should be the same as the
+subsampling_proportion parameter passed for subsamples_permuted_networks to obtain x.}
+
+\item{network_metrics_functions_list}{This is the same argument that is passed for obtaining the results from the function subsamples_permuted_networks.
+A list consisting of function definitions of the network metrics that the user wants to evaluate. Each element in the list should have an assigned name. 
+Default = c("edge_density" = function(x) igraph::edge_density(x), "diameter" = function(x) igraph::diameter(x, weights = NA), "transitivity" = function(x) igraph::transitivity(x))}
 
 \item{...}{Further arguments are ignored}
 }

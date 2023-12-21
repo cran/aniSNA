@@ -9,24 +9,26 @@ bootstrapped_difference_pvalues(
   n_versions = 1000,
   seed = 12345,
   n.iter = 10,
-  network_metrics = c("mean_degree", "mean_strength", "density", "diameter",
-    "transitivity")
+  network_metrics_functions_list = c(edge_density = function(x) igraph::edge_density(x),
+    diameter = function(x) igraph::diameter(x, weights = NA), transitivity = function(x)
+    igraph::transitivity(x))
 )
 }
 \arguments{
 \item{network}{An igraph object}
 
-\item{n_versions}{Number of bootstrapped versions to be used}
+\item{n_versions}{Number of bootstrapped versions to be used (default = 1000)}
 
 \item{seed}{seed number}
 
 \item{n.iter}{Number of iterations at each level}
 
-\item{network_metrics}{Network metrics to be evaluated. This should be supplied as a character vector and the values 
-should be chosen from "mean_degree", "mean_strength", "density", "diameter", "transitivity". (default = c("mean_degree", "mean_strength", "density", "diameter", "transitivity")).}
+\item{network_metrics_functions_list}{A list consisting of function definitions of the network metrics that the user wants to evaluate. Each element in the list should have an assigned name.
+Default = c("edge_density" = function(x) igraph::edge_density(x), "diameter" = function(x) igraph::diameter(x, weights = NA), "transitivity" = function(x) igraph::transitivity(x))}
 }
 \value{
-A matrix of p-values whose rows correspond to the sub-sample size and columns correspond to the chosen network metric.
+A matrix of p-values whose rows correspond to the sub-sample size and columns correspond to the chosen network metric. The sub-sample size values (corresponding to rows) 
+occur in multiples of 5 and range from 5 to a maximum of half the number of nodes in the network
 }
 \description{
 To obtain two non-overlapping bootstrapped versions and obtain p-values for the significance of difference between them
@@ -34,6 +36,7 @@ To obtain two non-overlapping bootstrapped versions and obtain p-values for the 
 \examples{
 \donttest{
 data(elk_network_2010)
-bootstrapped_difference_pvalues(elk_network_2010, n_versions = 100)
+mean_pvalue_matrix <- bootstrapped_difference_pvalues(elk_network_2010, n_versions = 100)
+plot(mean_pvalue_matrix)
 }
 }

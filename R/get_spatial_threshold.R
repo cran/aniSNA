@@ -19,7 +19,7 @@ get_spatial_threshold <- function(species_interactions, interval_size) {
   plot(breaks[-1], as.numeric(distance.freq),
     type = "b",
     col = "blue",
-    main = paste("Number observations in each interval", sep = ""),
+    main = paste("Number of observations in each interval", sep = ""),
     ylab = "Number of observations",
     xlab = "Distance"
   )

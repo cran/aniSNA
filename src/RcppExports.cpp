@@ -40,21 +40,10 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpp_hello_world
-List rcpp_hello_world();
-RcppExport SEXP _aniSNA_rcpp_hello_world() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(rcpp_hello_world());
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_aniSNA_distance_radian_coordinates", (DL_FUNC) &_aniSNA_distance_radian_coordinates, 4},
     {"_aniSNA_interacting_pairs", (DL_FUNC) &_aniSNA_interacting_pairs, 6},
-    {"_aniSNA_rcpp_hello_world", (DL_FUNC) &_aniSNA_rcpp_hello_world, 0},
     {NULL, NULL, 0}
 };
 

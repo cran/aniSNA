@@ -27,7 +27,3 @@ interacting_pairs <- function(i, datetime, latitude, longitude, temporal_thresh,
     .Call(`_aniSNA_interacting_pairs`, i, datetime, latitude, longitude, temporal_thresh, spatial_thresh)
 }
 
-rcpp_hello_world <- function() {
-    .Call(`_aniSNA_rcpp_hello_world`)
-}
-

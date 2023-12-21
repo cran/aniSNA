@@ -8,8 +8,13 @@ regression_slope_analyze(
   network,
   n_simulations = 10,
   subsampling_proportion = c(0.1, 0.3, 0.5, 0.7, 0.9),
-  network_metrics = c("degree", "strength", "betweenness", "clustering_coefficient",
-    "eigenvector_centrality")
+  network_metrics_functions_list = c(degree = function(net, sub_net) igraph::degree(net,
+    v = igraph::V(sub_net)$name), strength = function(net, sub_net) igraph::strength(net,
+    v = igraph::V(sub_net)$name), betweenness = function(net, sub_net)
+    igraph::betweenness(net, v = igraph::V(sub_net)$name), clustering_coefficient =
+    function(net, sub_net) igraph::transitivity(net, type = "local", vids =
+    igraph::V(sub_net)$name), eigenvector_centrality = function(net, sub_net)
+    igraph::eigen_centrality(net)$vector[igraph::V(sub_net)$name])
 )
 }
 \arguments{
@@ -19,7 +24,13 @@ regression_slope_analyze(
 
 \item{subsampling_proportion}{A vector depicting proportions of sub-sampled nodes}
 
-\item{network_metrics}{A vector depicting names of local global network metrics}
+\item{network_metrics_functions_list}{A list consisting of function definitions of the network metrics that the user wants to evaluate. Each element in the list should have an assigned name. Each function 
+definition should include two parameters, one for the main network and another one for the subnetwork. See default example.
+ Default = c("degree" = function(net, sub_net) igraph::degree(net, v = igraph::V(sub_net)$name),
+ "strength" = function(net, sub_net) igraph::strength(net, v = igraph::V(sub_net)$name),
+ "betweenness" = function(net, sub_net) igraph::betweenness(net, v = igraph::V(sub_net)$name),
+ "clustering_coefficient" = function(net, sub_net) igraph::transitivity(net, type = "local", vids = igraph::V(sub_net)$name),
+ "eigenvector_centrality" = function(net, sub_net) igraph::eigen_centrality(net)$vector[igraph::V(sub_net)$name])}
 }
 \value{
 A list of network metrics of class list_regression_matrices. Each element of list is a matrix whose columns 
@@ -34,6 +45,7 @@ To perform regression analysis for local network metrics
 \examples{
 \donttest{
 data(elk_network_2010)
-regression_slope_analyze(elk_network_2010)
+elk_regression_analysis <- regression_slope_analyze(elk_network_2010)
+plot(elk_regression_analysis)
 }
 }

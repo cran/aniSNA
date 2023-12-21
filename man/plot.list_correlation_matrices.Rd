@@ -7,9 +7,9 @@
 \method{plot}{list_correlation_matrices}(x, ...)
 }
 \arguments{
-\item{x}{A list of matrices obtained from correlation_analyze function}
+\item{x}{A list of matrices obtained from correlation_analyze function.}
 
-\item{...}{Further arguments are ignored}
+\item{...}{Further arguments are ignored.}
 }
 \value{
 No return value, called for side effects. The plots show mean and standard deviation of correlation coefficients obtained over multiple iterations.

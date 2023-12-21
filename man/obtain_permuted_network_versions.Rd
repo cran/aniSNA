@@ -24,7 +24,7 @@ obtain_permuted_network_versions(
 \item{n_cores}{Number of cores for parallel processing with default 1}
 }
 \value{
-A list of size n_permutations where each element is a network of class igraph obtained by permuting raw datastream
+An object of class "list_permuted_networks" of size n_permutations where each element is a network of class igraph obtained by permuting raw datastream
 }
 \description{
 Function to obtain permuted networks from raw datastream

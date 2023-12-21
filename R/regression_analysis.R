@@ -3,7 +3,13 @@
 #' @param network An igraph graph object consisting of observed network
 #' @param n_simulations Number of sub-samples to be obtained at each level
 #' @param subsampling_proportion A vector depicting proportions of sub-sampled nodes
-#' @param network_metrics A vector depicting names of local global network metrics 
+#' @param network_metrics_functions_list A list consisting of function definitions of the network metrics that the user wants to evaluate. Each element in the list should have an assigned name. Each function 
+#' definition should include two parameters, one for the main network and another one for the subnetwork. See default example.
+#'  Default = c("degree" = function(net, sub_net) igraph::degree(net, v = igraph::V(sub_net)$name),
+#'  "strength" = function(net, sub_net) igraph::strength(net, v = igraph::V(sub_net)$name),
+#'  "betweenness" = function(net, sub_net) igraph::betweenness(net, v = igraph::V(sub_net)$name),
+#'  "clustering_coefficient" = function(net, sub_net) igraph::transitivity(net, type = "local", vids = igraph::V(sub_net)$name),
+#'  "eigenvector_centrality" = function(net, sub_net) igraph::eigen_centrality(net)$vector[igraph::V(sub_net)$name])
 #'
 #' @return A list of network metrics of class list_regression_matrices. Each element of list is a matrix whose columns 
 #'         correspond to subsampling_proportion and rows correspond to n_simulations.
@@ -15,42 +21,40 @@
 #' @examples
 #' \donttest{
 #' data(elk_network_2010)
-#' regression_slope_analyze(elk_network_2010)
+#' elk_regression_analysis <- regression_slope_analyze(elk_network_2010)
+#' plot(elk_regression_analysis)
 #' }
 regression_slope_analyze <- function(network, 
-                                n_simulations = 10,
-                                subsampling_proportion = c(0.1, 0.30, 0.50, 0.70, 0.90),
-                                network_metrics = c("degree", "strength", "betweenness", "clustering_coefficient", "eigenvector_centrality")){
+                                     n_simulations = 10,
+                                     subsampling_proportion = c(0.1, 0.30, 0.50, 0.70, 0.90),
+                                     network_metrics_functions_list = c("degree" = function(net, sub_net) igraph::degree(net, v = igraph::V(sub_net)$name),
+                                                                        "strength" = function(net, sub_net) igraph::strength(net, v = igraph::V(sub_net)$name),
+                                                                        "betweenness" = function(net, sub_net) igraph::betweenness(net, v = igraph::V(sub_net)$name),
+                                                                        "clustering_coefficient" = function(net, sub_net) igraph::transitivity(net, type = "local", vids = igraph::V(sub_net)$name),
+                                                                        "eigenvector_centrality" = function(net, sub_net) igraph::eigen_centrality(net)$vector[igraph::V(sub_net)$name])){
   
   regression_slope <- list()
-  regression_slope <- lapply(1:length(network_metrics), function(i){ 
-    regression_slope[[network_metrics[i]]] <- matrix(0, 
-                                                       n_simulations, 
-                                                       length(subsampling_proportion), 
-                                                       dimnames = list(as.character(c(1:n_simulations)), as.character(subsampling_proportion*100)))
+  regression_slope <- lapply(1:length(network_metrics_functions_list), function(i){ 
+    regression_slope[[names(network_metrics_functions_list)[i]]] <- matrix(0, 
+                                                                           n_simulations, 
+                                                                           length(subsampling_proportion), 
+                                                                           dimnames = list(as.character(c(1:n_simulations)), as.character(subsampling_proportion*100)))
   })
-  names(regression_slope) <- network_metrics
+  names(regression_slope) <- names(network_metrics_functions_list)
   
   for (i in 1:n_simulations) {
     for (j in 1:length(subsampling_proportion)) {
       random_sample_nodes <- as.vector(sample(igraph::V(network), size = subsampling_proportion[j] * igraph::gorder(network)))
       sub_network <- igraph::induced_subgraph(network, random_sample_nodes, impl = "auto")
       
-      if("degree" %in% network_metrics){regression_slope$degree[i,j] <- stats::coef(stats::lm(igraph::degree(sub_network) ~ igraph::degree(network, igraph::V(sub_network)$name)))[2]}
-      if("strength" %in% network_metrics){regression_slope$strength[i,j] <- stats::coef(stats::lm(igraph::strength(sub_network) ~ igraph::strength(network, igraph::V(sub_network)$name)))[2]}
-      if("betweenness" %in% network_metrics){regression_slope$betweenness[i,j] <- stats::coef(stats::lm(igraph::betweenness(sub_network) ~ igraph::betweenness(network, igraph::V(sub_network)$name)))[2]}
-      if("clustering_coefficient" %in% network_metrics){
-        #Sometimes, clustering_coefficients can be computed for very low levels of sub sampling. The program will return NA if that is the case. 
+      k <- 1
+      for(f in network_metrics_functions_list){
         tryCatch(
-          (regression_slope$clustering_coefficient[i,j] <- stats::coef(stats::lm(igraph::transitivity(sub_network, type = "local") ~ igraph::transitivity(network, type = "local", vids = igraph::V(sub_network)$name)))[2]),
+          (regression_slope[[names(network_metrics_functions_list)[k]]][i,j] <- stats::coef(stats::lm(f(sub_network, sub_network) ~ f(network, sub_network)))[2]),
           error = function(e){NA}
         )
+        k <- k+1
       }
-      if("eigenvector_centrality" %in% network_metrics){
-        #scaling the eigenvector centrality
-        eigen_cen_network <- igraph::eigen_centrality(network)$vector
-        eigen_cen_network_scaled <- (eigen_cen_network - mean(eigen_cen_network))/(max(eigen_cen_network) - min(eigen_cen_network))
-        regression_slope$eigenvector_centrality[i,j] <- stats::coef(stats::lm(as.vector(scale(igraph::eigen_centrality(sub_network)$vector, scale = FALSE)) ~ eigen_cen_network_scaled[igraph::V(sub_network)$name], singular.ok = TRUE))[2]}
     }
   }
   
