@@ -13,10 +13,10 @@
 #' @examples
 #' \donttest{
 #' data(elk_2010_permutations)
-#' elk_subsamples_permuted_networks <- subsamples_permuted_networks(elk_2010_permutations)
+#' elk_subsamples_permuted_networks <- subsampled_permuted_network_metrics(elk_2010_permutations)
 #' plot(elk_subsamples_permuted_networks, elk_network_2010)
 #' }
-subsamples_permuted_networks <- function(networks_list,
+subsampled_permuted_network_metrics <- function(networks_list,
                                          subsampling_proportion = c(0.1, 0.30, 0.50, 0.70, 0.90),
                                          network_metrics_functions_list = c("edge_density" = function(x) igraph::edge_density(x),
                                                                             "diameter" = function(x) igraph::diameter(x, weights = NA),
@@ -54,12 +54,12 @@ subsamples_permuted_networks <- function(networks_list,
 
 #' To plot sub-sampling results of the original network and permuted networks
 #'
-#' @param x A list of matrices obtained from subsamples_permuted_networks function of class "Subsampled_Permuted_Network_Metrics"
+#' @param x A list of matrices obtained from subsampled_permuted_network_metrics function of class "Subsampled_Permuted_Network_Metrics"
 #' @param network An igraph graph object consisting of observed network
 #' @param n_simulations For subsampling results of original network, this determines the number of sub-samples to be obtained at each level
 #' @param subsampling_proportion A vector depicting the levels (in proportion) at which subsamples to be taken. This parameter should be the same as the
-#' subsampling_proportion parameter passed for subsamples_permuted_networks to obtain x.
-#' @param network_metrics_functions_list This is the same argument that is passed for obtaining the results from the function subsamples_permuted_networks.
+#' subsampling_proportion parameter passed for the function subsampled_permuted_network_metrics to obtain x.
+#' @param network_metrics_functions_list This is the same argument that is passed for obtaining the results from the function subsampled_permuted_network_metrics.
 #' A list consisting of function definitions of the network metrics that the user wants to evaluate. Each element in the list should have an assigned name. 
 #' Default = c("edge_density" = function(x) igraph::edge_density(x), "diameter" = function(x) igraph::diameter(x, weights = NA), "transitivity" = function(x) igraph::transitivity(x))
 #' @param ... Further arguments are ignored
@@ -73,7 +73,7 @@ subsamples_permuted_networks <- function(networks_list,
 #' @examples
 #' \donttest{
 #' data(elk_2010_permutations, elk_network_2010)
-#' elk_subsamples_permuted_networks <- subsamples_permuted_networks(elk_2010_permutations)
+#' elk_subsamples_permuted_networks <- subsampled_permuted_network_metrics(elk_2010_permutations)
 #' plot(elk_subsamples_permuted_networks, elk_network_2010)
 #' }
 plot.Subsampled_Permuted_Network_Metrics <- function(x, network,

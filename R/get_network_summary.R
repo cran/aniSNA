@@ -40,6 +40,7 @@ plot_network <- function(species_network, seed = 1){
   plot(species_network,
        vertex.size = 7, 
        vertex.frame.color = "black",
+       main = "Network structure",
        vertex.label = NA, 
        edge.lty=c("solid"),
        layout = layout)

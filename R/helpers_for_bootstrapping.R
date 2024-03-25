@@ -15,6 +15,11 @@ compare_boot_nets=function(bootnets1, bootnets2, network_metrics_functions_list)
   boot1.stats=sapply(1:length(bootnets1$boot.nets), function(i) network_metrics_evaluate_from_adjacency_matrix(bootnets1$boot.nets[[i]], network_metrics_functions_list)) # generates all the bootstrap statistics
   boot2.stats=sapply(1:length(bootnets2$boot.nets), function(i) network_metrics_evaluate_from_adjacency_matrix(bootnets2$boot.nets[[i]], network_metrics_functions_list))
   
+  if(length(network_metrics_functions_list) == 1){
+    boot1.stats <- matrix(boot1.stats, nrow = 1)
+    boot2.stats <- matrix(boot2.stats, nrow = 1)
+  }
+  
   for (i in 1:length(network_metrics_functions_list)) {
     t.stat=(mean(boot1.stats[i,])-mean(boot2.stats[i,]))/sqrt(stats::var(boot1.stats[i,]) + stats::var(boot2.stats[i,]))
     ans[i]=2*stats::pt(-abs(t.stat),df=2*length(boot1.stats[i,])-2) # two-sided t-test
@@ -42,19 +47,6 @@ two_samples_network <- function(network, size){
 network_metrics_evaluate_from_adjacency_matrix=function(x, funcs) {
   x <- igraph::graph_from_adjacency_matrix(x, mode = "undirected", weighted = TRUE)
   return(unlist(lapply(funcs, function(f) f(x))))
-}
-
-
-netstats=function(M, network_metrics) {
-  network <- igraph::graph_from_adjacency_matrix(M, mode = "undirected", weighted = TRUE)
-  ans <- c()
-  if("mean_degree" %in% network_metrics){ans <- c(ans, "mean_degree" = mean(igraph::degree(network)) )}
-  if("mean_strength" %in% network_metrics){ans <- c(ans, "mean_strength" = mean(igraph::strength(network)) )}
-  if("density" %in% network_metrics){ans <- c(ans, "density" = igraph::edge_density(network) )}
-  if("diameter" %in% network_metrics){ans <- c(ans, "diameter" = igraph::diameter(network, weights = NA) )}
-  if("transitivity" %in% network_metrics){ans <- c(ans, "transitivity" = igraph::transitivity(network) )}
-  
-  return(ans)
 }
 
 #Function to pass a network and obtain p value matrix
@@ -92,19 +84,21 @@ sub_sample_network <- function(network, size){
 
 #A function that takes booststrapped samples and a function to obtain the required network statistics
 #and obtains a vector of width of confidence intervals for the estimates
-CI_width_nets=function(bootnets, network_metrics_functions_list) { 
+CI_width_nets=function(bootnets, network_metrics_functions_list, CI_size) { 
   ans=NULL
   boot.stats=sapply(1:length(bootnets$boot.nets), function(i) network_metrics_evaluate_from_adjacency_matrix(bootnets$boot.nets[[i]], network_metrics_functions_list)) # generates all the bootstrap statistics
   
+  if(length(network_metrics_functions_list) == 1) boot.stats <- matrix(boot.stats, nrow = 1)
+  
   for (i in 1:length(boot.stats[,1])) {
-    quant <- stats::quantile(boot.stats[i,], probs=c(0.025,0.975), na.rm = TRUE)
-    ans[i] <- quant[2] - quant[1] #width of 95% CI
+    quant <- stats::quantile(boot.stats[i,], probs=c((1-CI_size)/2, 0.5 + CI_size/2), na.rm = TRUE)
+    ans[i] <- quant[2] - quant[1] #width of CI
   }
   names(ans)=names(boot.stats[,1])
   return(ans)
 }
 
-CI_matrix <- function(network, size_subnet, n_versions, n.iter = 10, network_metrics_functions_list){
+CI_matrix <- function(network, size_subnet, n_versions, n.iter = 10, network_metrics_functions_list, CI_size){
   
   width_CI <- data.frame(temp = numeric(0))
   for(i in 1:length(network_metrics_functions_list)){
@@ -123,7 +117,7 @@ CI_matrix <- function(network, size_subnet, n_versions, n.iter = 10, network_met
     g_boot = net_bootstrap(g_matrix, n_versions = n_versions)
     
     #3. Computes CI width for each subnetwork's bootstrapped versions
-    width_CI[t,] <- CI_width_nets(g_boot, network_metrics_functions_list)
+    width_CI[t,] <- CI_width_nets(g_boot, network_metrics_functions_list, CI_size)
   }
   #4. Takes in all the CI lengths and returns a dataframe with rows equal to number of iterations 
   #and columns equal to number of network statistics

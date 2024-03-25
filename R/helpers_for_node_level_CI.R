@@ -1,4 +1,4 @@
-calculate_CI_nodes <- function(network, bs_samples_network, network_metric){
+calculate_CI_nodes <- function(network, bs_samples_network, network_metric, CI_size){
   
   confidence_intervals_node_df <- data.frame("node_id" = character(igraph::vcount(network)), 
                                              "CI_lower" = integer(igraph::vcount(network)), 
@@ -15,7 +15,7 @@ calculate_CI_nodes <- function(network, bs_samples_network, network_metric){
       return(value_vector)
     }))
     #Obtain 95% confidence intervals
-    quant <- stats::quantile(node_metric_vector, probs=c(0.25,0.75), na.rm = TRUE)
+    quant <- stats::quantile(node_metric_vector, probs=c((1-CI_size)/2, 0.5 + CI_size/2), na.rm = TRUE)
     confidence_intervals_node_df[k,] <- c(i, quant[1], quant[2])
     k <- k+1
   }

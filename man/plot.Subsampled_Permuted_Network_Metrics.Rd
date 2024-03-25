@@ -16,16 +16,16 @@
 )
 }
 \arguments{
-\item{x}{A list of matrices obtained from subsamples_permuted_networks function of class "Subsampled_Permuted_Network_Metrics"}
+\item{x}{A list of matrices obtained from subsampled_permuted_network_metrics function of class "Subsampled_Permuted_Network_Metrics"}
 
 \item{network}{An igraph graph object consisting of observed network}
 
 \item{n_simulations}{For subsampling results of original network, this determines the number of sub-samples to be obtained at each level}
 
 \item{subsampling_proportion}{A vector depicting the levels (in proportion) at which subsamples to be taken. This parameter should be the same as the
-subsampling_proportion parameter passed for subsamples_permuted_networks to obtain x.}
+subsampling_proportion parameter passed for the function subsampled_permuted_network_metrics to obtain x.}
 
-\item{network_metrics_functions_list}{This is the same argument that is passed for obtaining the results from the function subsamples_permuted_networks.
+\item{network_metrics_functions_list}{This is the same argument that is passed for obtaining the results from the function subsampled_permuted_network_metrics.
 A list consisting of function definitions of the network metrics that the user wants to evaluate. Each element in the list should have an assigned name. 
 Default = c("edge_density" = function(x) igraph::edge_density(x), "diameter" = function(x) igraph::diameter(x, weights = NA), "transitivity" = function(x) igraph::transitivity(x))}
 
@@ -40,7 +40,7 @@ To plot sub-sampling results of the original network and permuted networks
 \examples{
 \donttest{
 data(elk_2010_permutations, elk_network_2010)
-elk_subsamples_permuted_networks <- subsamples_permuted_networks(elk_2010_permutations)
+elk_subsamples_permuted_networks <- subsampled_permuted_network_metrics(elk_2010_permutations)
 plot(elk_subsamples_permuted_networks, elk_network_2010)
 }
 }

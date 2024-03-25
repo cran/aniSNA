@@ -14,6 +14,7 @@
 #'"eigenvector_centrality" = function(x) igraph::eigen_centrality(x)$vector
 #')
 #' @param n_cores Number of cores for parallel processing with default 1.
+#' @param CI_size Size of confidence interval. Default is 0.95 that generates a 95\% confidence interval.
 #'
 #' @return A list of dataframes of class list_node_level_CI. Each element of list is a dataframe having five columns and
 #'         having number of rows equal to number of nodes in the network. The five columns correspond to node_number,
@@ -26,10 +27,10 @@
 #' @examples
 #'  \donttest{
 #' data(elk_network_2010)
-#' elk_node_level_CI <- obtain_node_level_CI(elk_network_2010)
+#' elk_node_level_CI <- node_level_CI(elk_network_2010)
 #' plot(elk_node_level_CI)
 #' }
-obtain_node_level_CI <- function(network, 
+node_level_CI <- function(network, 
                                  n_versions = 100,
                                  network_metrics_functions_list = c("degree" = igraph::degree, 
                                                                     "strength" = igraph::strength , 
@@ -40,13 +41,14 @@ obtain_node_level_CI <- function(network,
                                                                       return(trans)
                                                                     },
                                                                     "eigenvector_centrality" = function(x) igraph::eigen_centrality(x)$vector),
-                                 n_cores = 1){
+                                 n_cores = 1,
+                                 CI_size = 0.95){
   
   bs_samples_matrix <- obtain_bootstrapped_samples(network, n_versions = n_versions)
   bs_samples_network <- sapply(bs_samples_matrix[[2]], function(x) igraph::graph_from_adjacency_matrix(x, mode = "undirected", weighted = TRUE))
   
   node_level_all_metrics <- parallel::mclapply(1:length(network_metrics_functions_list), function(j) {
-    metric_CI <- calculate_CI_nodes(network, bs_samples_network, network_metrics_functions_list[[j]])
+    metric_CI <- calculate_CI_nodes(network, bs_samples_network, network_metrics_functions_list[[j]], CI_size)
     #make a dataframe with values of node metric, names and index
     species_metric_CI <- data.frame("node_number" = 1:igraph::vcount(network), 
                                     "node_name" = igraph::V(network)$name, 
@@ -66,11 +68,11 @@ obtain_node_level_CI <- function(network,
 
 #' To plot the results for node-level confidence intervals
 #'
-#' @param x A list of dataframes obtained from obtain_node_level_CI function.
+#' @param x A list of dataframes obtained from node_level_CI function.
 #' @param ... Further arguments are ignored.
 #'
 #' @return No return value, called for side effects. 
-#' The plots show 95% confidence intervals along with the observed metric value for each of the nodes in the network.
+#' The plots show confidence intervals along with the observed metric value for each of the nodes in the network.
 #' @export
 #' @method plot list_node_level_CI
 #'
@@ -78,7 +80,7 @@ obtain_node_level_CI <- function(network,
 #' @examples
 #' \donttest{
 #' data(elk_network_2010)
-#' elk_node_level_CI <- obtain_node_level_CI(elk_network_2010)
+#' elk_node_level_CI <- node_level_CI(elk_network_2010)
 #' plot(elk_node_level_CI)
 #' }
 plot.list_node_level_CI <- function(x,...){
@@ -99,9 +101,10 @@ plot.list_node_level_CI <- function(x,...){
          yaxt ="n",
          type = 'n',
          xlab = "Node Number",
-         ylab = names(node_level_all_metrics)[[j]],
+         ylab = "Value",
          ylim = c(min(node_level_all_metrics[[j]]$metric_value, node_level_all_metrics[[j]]$lower_CI), max(node_level_all_metrics[[j]]$metric_value, node_level_all_metrics[[j]]$upper_CI)),
-         xlim = c(1, length(node_level_all_metrics[[j]]$node_number)))
+         xlim = c(1, length(node_level_all_metrics[[j]]$node_number)),
+         main = names(node_level_all_metrics)[[j]])
     
     graphics::abline(h =  pretty(max_limit), 
                      v = 1:length(node_level_all_metrics[[j]]$node_number), lty = 1, col = "grey89")

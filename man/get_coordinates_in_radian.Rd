@@ -2,16 +2,17 @@
 % Please edit documentation in R/get_interactions.R
 \name{get_coordinates_in_radian}
 \alias{get_coordinates_in_radian}
-\title{To obtain latitude and longitude values in radian}
+\title{To convert latitude and longitude values from degrees to radians}
 \usage{
 get_coordinates_in_radian(species_raw)
 }
 \arguments{
-\item{species_raw}{A DataFrame consisting of GPS observations. The DataFrame must have a "latitude" column and a "longitude" column}
+\item{species_raw}{A DataFrame consisting of GPS observations. The DataFrame must have a "latitude" column and a "longitude" column
+whose values are specified in degrees.}
 }
 \value{
 The same DataFrame that has been passed as the argument with two additional columns namely "latitude_rad" and "longitude_rad"
 }
 \description{
-To obtain latitude and longitude values in radian
+To convert latitude and longitude values from degrees to radians
 }

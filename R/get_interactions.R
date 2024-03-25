@@ -1,8 +1,9 @@
 
 
-#' To obtain latitude and longitude values in radian
+#' To convert latitude and longitude values from degrees to radians
 #'
 #' @param species_raw A DataFrame consisting of GPS observations. The DataFrame must have a "latitude" column and a "longitude" column
+#' whose values are specified in degrees. 
 #'
 #' @return The same DataFrame that has been passed as the argument with two additional columns namely "latitude_rad" and "longitude_rad"
 #' @export

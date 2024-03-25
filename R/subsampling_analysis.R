@@ -101,8 +101,9 @@ plot.Subsampled_Network_Metrics <- function(x, network,
     )
     graphics::axis(side = 1, at = c(1:ncol(subsampling_result[[i]])), labels = colnames(subsampling_result[[i]]))
     graphics::title(names(subsampling_result)[i], adj = 0.5, line = 1)
-    graphics::legend("bottomright", legend = "Observed Value",col = "red", lty = 1)
-    graphics::abline(h = metrics_list[[i]], col = "red")
+    graphics::lines(x = c(graphics::par('usr')[2], graphics::par('usr')[1]), y = c(mean(subsampling_result[[i]][,5]), mean(subsampling_result[[i]][,5])), lty = 2, col = "red")
+    graphics::mtext(paste("Observed value (red line) : ", 
+                          round(metrics_list[[i]],3), sep = ""), side = 3 , col = "red", cex = 0.8)
   }
 }
 

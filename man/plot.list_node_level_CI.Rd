@@ -7,13 +7,13 @@
 \method{plot}{list_node_level_CI}(x, ...)
 }
 \arguments{
-\item{x}{A list of dataframes obtained from obtain_node_level_CI function.}
+\item{x}{A list of dataframes obtained from node_level_CI function.}
 
 \item{...}{Further arguments are ignored.}
 }
 \value{
 No return value, called for side effects. 
-The plots show 95% confidence intervals along with the observed metric value for each of the nodes in the network.
+The plots show confidence intervals along with the observed metric value for each of the nodes in the network.
 }
 \description{
 To plot the results for node-level confidence intervals
@@ -21,7 +21,7 @@ To plot the results for node-level confidence intervals
 \examples{
 \donttest{
 data(elk_network_2010)
-elk_node_level_CI <- obtain_node_level_CI(elk_network_2010)
+elk_node_level_CI <- node_level_CI(elk_network_2010)
 plot(elk_node_level_CI)
 }
 }

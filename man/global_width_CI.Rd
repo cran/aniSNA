@@ -2,7 +2,7 @@
 % Please edit documentation in R/global_confidence_intervals.R
 \name{global_width_CI}
 \alias{global_width_CI}
-\title{To obtain width of 95\% confidence intervals for global network metrics using bootstrapped versions at each level of sub-sampling}
+\title{To obtain width of confidence intervals for global network metrics using bootstrapped versions at each level of sub-sampling}
 \usage{
 global_width_CI(
   network,
@@ -12,11 +12,12 @@ global_width_CI(
   network_metrics_functions_list = c(edge_density = function(x) igraph::edge_density(x),
     diameter = function(x) igraph::diameter(x, weights = NA), transitivity = function(x)
     igraph::transitivity(x)),
-  scaled_metrics = NULL
+  scaled_metrics = NULL,
+  CI_size = 0.95
 )
 }
 \arguments{
-\item{network}{An igraph object}
+\item{network}{An igraph object consisting of observed network.}
 
 \item{n_versions}{Number of bootstrapped versions to be used. (default = 100)}
 
@@ -28,13 +29,15 @@ global_width_CI(
 Default = c("edge_density" = function(x) igraph::edge_density(x), "diameter" = function(x) igraph::diameter(x, weights = NA), "transitivity" = function(x) igraph::transitivity(x))}
 
 \item{scaled_metrics}{Optional. A vector subset of the names of functions in network_metrics_functions_list with the metrics that should be scaled. For example scaled_metrics = c("diameter")}
+
+\item{CI_size}{Size of confidence interval. Default is 0.95 that generates a 95\% confidence interval.}
 }
 \value{
 A matrix of class Width_CI_matrix containing width of Confidence Intervals where each row corresponds to the sub-sample size and columns correspond to the chosen network metric.
 Sub-sample size values occur in multiples of 10 and range from 10 to maximum multiple of 10 less than or equal to the number of nodes in the network.
 }
 \description{
-To obtain width of 95\% confidence intervals for global network metrics using bootstrapped versions at each level of sub-sampling
+To obtain width of confidence intervals for global network metrics using bootstrapped versions at each level of sub-sampling
 }
 \examples{
 \donttest{

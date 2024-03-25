@@ -1,14 +1,16 @@
 
 
-#' To obtain width of 95\% confidence intervals for global network metrics using bootstrapped versions at each level of sub-sampling
+#' To obtain width of confidence intervals for global network metrics using bootstrapped versions at each level of sub-sampling
 #'
-#' @param network An igraph object
+#' @param network An igraph object consisting of observed network.
 #' @param n_versions Number of bootstrapped versions to be used. (default = 100)
 #' @param seed seed number
 #' @param n.iter Number of iterations at each level. (default = 10)
 #' @param network_metrics_functions_list A list consisting of function definitions of the global network metrics that the user wants to evaluate. Each element in the list should have an assigned name.
 #'  Default = c("edge_density" = function(x) igraph::edge_density(x), "diameter" = function(x) igraph::diameter(x, weights = NA), "transitivity" = function(x) igraph::transitivity(x))
 #' @param scaled_metrics Optional. A vector subset of the names of functions in network_metrics_functions_list with the metrics that should be scaled. For example scaled_metrics = c("diameter")
+#' @param CI_size Size of confidence interval. Default is 0.95 that generates a 95\% confidence interval.
+#'
 #'
 #'
 #' @return A matrix of class Width_CI_matrix containing width of Confidence Intervals where each row corresponds to the sub-sample size and columns correspond to the chosen network metric.
@@ -28,7 +30,8 @@ global_width_CI <- function(network,
                      network_metrics_functions_list = c("edge_density" = function(x) igraph::edge_density(x),
                                                         "diameter" = function(x) igraph::diameter(x, weights = NA),
                                                         "transitivity" = function(x) igraph::transitivity(x)),
-                     scaled_metrics = NULL){
+                     scaled_metrics = NULL,
+                     CI_size = 0.95){
   
   sample_size_values <- seq(10, igraph::gorder(network), 10)
   mean_value_CI_len <- data.frame(temp = numeric(0))
@@ -39,7 +42,7 @@ global_width_CI <- function(network,
   
   j <- 1
   for(s in sample_size_values){
-    metrics_CI_len <- CI_matrix(network, size_subnet = s, n_versions, n.iter, network_metrics_functions_list)
+    metrics_CI_len <- CI_matrix(network, size_subnet = s, n_versions, n.iter, network_metrics_functions_list, CI_size)
     mean_value_CI_len[j,] <- apply(metrics_CI_len, 2, mean, na.rm=TRUE)
     j <- j+1
   }
@@ -102,13 +105,14 @@ plot.Width_CI_matrix <- function(x,...){
 
 
 
-#' To obtain 95\% confidence intervals around the observed global network statistics
+#' To obtain confidence intervals around the observed global network statistics
 #' 
 #'
-#' @param network An igraph object
+#' @param network An igraph object consisting of observed network.
 #' @param n_versions  Number of bootstrapped versions to be used. (default = 100)
 #' @param network_metrics_functions_list A list consisting of function definitions of the network metrics that the user wants to evaluate. Each element in the list should have an assigned name.
 #'  Default = c("edge_density" = function(x) igraph::edge_density(x), "diameter" = function(x) igraph::diameter(x, weights = NA), "transitivity" = function(x) igraph::transitivity(x))
+#' @param CI_size Size of confidence interval. Default is 0.95 that generates a 95\% confidence interval.
 #'
 #' @return A DataFrame consisting of three columns. The first column contains the value of observed network metric, the second and 
 #' third column represent the lower and upper limit of 95% confidence interval respectively. The rows correspond to the network metrics chosen to evaluate. 
@@ -117,24 +121,27 @@ plot.Width_CI_matrix <- function(x,...){
 #' @examples
 #' \donttest{
 #' data(elk_network_2010)
-#' obtain_global_confidence_intervals(elk_network_2010, n_versions = 100, 
+#' global_CI(elk_network_2010, n_versions = 100, 
 #' network_metrics_functions_list = c("edge_density" = function(x) igraph::edge_density(x),
 #' "diameter" = function(x) igraph::diameter(x, weights = NA),
 #' "transitivity" = function(x) igraph::transitivity(x)))
 #' }
-obtain_global_confidence_intervals <- function(network, 
+global_CI <- function(network, 
                                         n_versions = 100,
                                         network_metrics_functions_list = c("edge_density" = function(x) igraph::edge_density(x),
                                                                            "diameter" = function(x) igraph::diameter(x, weights = NA),
-                                                                           "transitivity" = function(x) igraph::transitivity(x))){
+                                                                           "transitivity" = function(x) igraph::transitivity(x)),
+                                        CI_size = 0.95){
   
   ans = data.frame(matrix(nrow = length(network_metrics_functions_list), ncol = 3)) 
   bootnets <- obtain_bootstrapped_samples(network, n_versions = n_versions)
   boot.stats=sapply(1:length(bootnets$boot.nets), function(i) network_metrics_evaluate_from_adjacency_matrix(bootnets$boot.nets[[i]], network_metrics_functions_list))
   orig.stats=network_metrics_evaluate_from_adjacency_matrix(bootnets$orig.net, network_metrics_functions_list)
   
+  if(length(network_metrics_functions_list) == 1) boot.stats <- matrix(boot.stats, nrow = 1)
+  
   for (i in 1:length(boot.stats[,1])) {
-    quant <- stats::quantile(boot.stats[i,], probs=c(0.025,0.975), na.rm = TRUE)
+    quant <- stats::quantile(boot.stats[i,], probs=c((1-CI_size)/2, 0.5 + CI_size/2), na.rm = TRUE)
     ans[i,] <- c(orig.stats[i], quant[1], quant[2])
   }
   rownames(ans)=names(boot.stats[,1])
