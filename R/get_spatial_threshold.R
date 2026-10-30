@@ -11,22 +11,55 @@
 #' data(elk_all_interactions_2010)
 #' get_spatial_threshold(elk_all_interactions_2010, interval_size = 2)
 get_spatial_threshold <- function(species_interactions, interval_size) {
-  max_distance <- max(species_interactions$distance)
-  breaks <- seq(0, max_distance, by = interval_size)
-  distance.cut <- cut(species_interactions$distance, breaks, right = FALSE)
-  distance.freq <- table(distance.cut)
 
-  plot(breaks[-1], as.numeric(distance.freq),
-    type = "b",
-    col = "blue",
-    main = paste("Number of observations in each interval", sep = ""),
-    ylab = "Number of observations",
-    xlab = "Distance"
+  max_distance <- max(species_interactions$distance)
+
+  breaks <- seq(
+    0,
+    max_distance,
+    by = interval_size
   )
 
-  nobs_wrt_distance <- as.data.frame(cbind(breaks[-1], as.numeric(distance.freq)))
-  colnames(nobs_wrt_distance) <- c("distance", "interactions_count")
-  
-  first_mode <- nobs_wrt_distance$distance[which.max(nobs_wrt_distance$interactions_count)]
+  distance.cut <- cut(
+    species_interactions$distance,
+    breaks,
+    right = FALSE
+  )
+
+  distance.freq <- table(distance.cut)
+
+  nobs_wrt_distance <- data.frame(
+    distance = breaks[-1],
+    interactions_count = as.numeric(distance.freq)
+  )
+
+  p <- ggplot2::ggplot(
+    nobs_wrt_distance,
+    ggplot2::aes(
+      x = .data$distance,
+      y = .data$interactions_count
+    )
+  ) +
+    ggplot2::geom_line(
+      colour = "blue",
+      linewidth = 1
+    ) +
+    ggplot2::geom_point(
+      colour = "blue",
+      size = 2
+    ) +
+    ggplot2::labs(
+      title = "Number of observations in each interval",
+      x = "Distance",
+      y = "Number of observations"
+    ) +
+    ggplot2::theme_bw()
+
+  print(p)
+
+  first_mode <- nobs_wrt_distance$distance[
+    which.max(nobs_wrt_distance$interactions_count)
+  ]
+
   return(first_mode)
 }

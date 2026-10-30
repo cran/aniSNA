@@ -1,0 +1,53 @@
+citHeader("To cite aniSNA in publications, please use:")
+
+bibentry(
+bibtype = "Article",
+header  = "To cite the aniSNA R package:",
+title   = "aniSNA : An R package to assess bias and uncertainty in social networks obtained from animals sampled via direct observations or satellite telemetry",
+author  = c(
+person("Prabhleen", "Kaur"),
+person("Simone", "Ciuti"),
+person("Adele K.", "Reinking"),
+person("Jeffrey L.", "Beck"),
+person("Michael", "Salter-Townshend")
+),
+journal = "bioRxiv",
+year    = "2024",
+month   = "May",
+doi     = "10.1101/2024.05.10.593659",
+url     = "https://doi.org/10.1101/2024.05.10.593659"
+)
+
+bibentry(
+bibtype = "Article",
+header  = "To cite the underlying methodology protocol:",
+title   = "A protocol for assessing bias and robustness of social network metrics using GPS based radio-telemetry data",
+author  = c(
+person("Prabhleen", "Kaur"),
+person("Simone", "Ciuti"),
+person("Federico", "Ossi"),
+person("Francesca", "Cagnacci"),
+person("Nicolas", "Morellet"),
+person("Anne", "Loison"),
+person("Kamal", "Atmeh"),
+person("Philip", "McLoughlin"),
+person("Adele K.", "Reinking"),
+person("Jeffrey L.", "Beck"),
+person("Anna C.", "Ortega"),
+person("Matthew", "Kauffman"),
+person("Mark S.", "Boyce"),
+person("Amy", "Haigh"),
+person("Anna", "David"),
+person("Laura L.", "Griffin"),
+person("Kimberly", "Conteddu"),
+person("Jane", "Faull"),
+person("Michael", "Salter-Townshend")
+),
+journal = "Movement Ecology",
+volume  = "12",
+number  = "1",
+year    = "2024",
+month   = "August",
+doi     = "10.1186/s40462-024-00494-6",
+url     = "https://doi.org/10.1186/s40462-024-00494-6"
+)

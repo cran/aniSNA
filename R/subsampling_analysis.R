@@ -32,7 +32,7 @@ subsampled_network_metrics <- function(network,
     subsampling_result[[i]] <- matrix(0, 
                                       n_simulations, 
                                       length(subsampling_proportion), 
-                                      dimnames = list(as.character(c(1:n_simulations)), as.character(subsampling_proportion*100)))
+                                      dimnames = list(as.character(c(1:n_simulations)), as.character(subsampling_proportion)))
   })
   names(subsampling_result) <- names(network_metrics_functions_list)
   
@@ -78,35 +78,87 @@ subsampled_network_metrics <- function(network,
 #' "diameter" = function(x) igraph::diameter(x, weights = NA),
 #' "transitivity" = function(x) igraph::transitivity(x)))
 #' 
-plot.Subsampled_Network_Metrics <- function(x, network,
-                                            network_metrics_functions_list = c("edge_density" = function(x) igraph::edge_density(x),
-                                                                               "diameter" = function(x) igraph::diameter(x, weights = NA),
-                                                                               "transitivity" = function(x) igraph::transitivity(x)),...){
-  
-  subsampling_result = x
-  
-  if(!inherits(subsampling_result, "Subsampled_Network_Metrics")){
+plot.Subsampled_Network_Metrics <- function(
+    x,
+    network,
+    network_metrics_functions_list = c(
+      "edge_density" = function(x) igraph::edge_density(x),
+      "diameter" = function(x) igraph::diameter(x, weights = NA),
+      "transitivity" = function(x) igraph::transitivity(x)
+    ),
+    ...
+) {
+
+  subsampling_result <- x
+
+  if (!inherits(subsampling_result,
+                "Subsampled_Network_Metrics")) {
     stop("x passed is not of class 'Subsampled_Network_Metrics'")
   }
-  
-  metrics_list <- network_metrics_evaluate(network, network_metrics_functions_list)
-  names(metrics_list) <- names(network_metrics_functions_list)
-  
-  for(i in 1:length(subsampling_result)){
-    graphics::boxplot(
-      x = subsampling_result[[i]], xaxt = "n", xlab = "Sub Sample Size(in %)", ylab = "Value", outline = FALSE,
-      border = "black",
-      col = "lightblue",
-      ylim = c(min(subsampling_result[[i]], metrics_list[[i]], na.rm = TRUE), max(subsampling_result[[i]], metrics_list[[i]], na.rm = TRUE))
-    )
-    graphics::axis(side = 1, at = c(1:ncol(subsampling_result[[i]])), labels = colnames(subsampling_result[[i]]))
-    graphics::title(names(subsampling_result)[i], adj = 0.5, line = 1)
-    graphics::lines(x = c(graphics::par('usr')[2], graphics::par('usr')[1]), y = c(mean(subsampling_result[[i]][,5]), mean(subsampling_result[[i]][,5])), lty = 2, col = "red")
-    graphics::mtext(paste("Observed value (red line) : ", 
-                          round(metrics_list[[i]],3), sep = ""), side = 3 , col = "red", cex = 0.8)
-  }
-}
 
+  metrics_list <- network_metrics_evaluate(
+    network,
+    network_metrics_functions_list
+  )
+
+  names(metrics_list) <- names(network_metrics_functions_list)
+  ans=list()
+
+  for (i in seq_along(subsampling_result)) {
+
+    plot_df <- as.data.frame(subsampling_result[[i]])
+
+    plot_df_long <- tidyr::pivot_longer(
+      plot_df,
+      cols = dplyr::everything(),
+      names_to = "SubsampleSize",
+      values_to = "Value"
+    )
+
+    observed_value <- metrics_list[[i]]
+
+    p <- ggplot2::ggplot(
+      plot_df_long,
+      ggplot2::aes(
+        x = .data$SubsampleSize,
+        y = .data$Value
+      )
+    ) +
+      ggplot2::geom_boxplot(
+        fill = "orange",
+        colour = "black",
+        outlier.shape = NA
+      ) +
+      ggplot2::geom_hline(
+        yintercept = observed_value,
+        colour = "red",
+        linetype = "dashed",
+        linewidth = 0.8
+      ) +
+      ggplot2::labs(
+        title = names(subsampling_result)[i],
+        x = "sub-sample proportion",
+        y = "Value",
+        subtitle = paste(
+          "Observed value:",
+          round(observed_value, 3)
+        )
+      ) +
+      ggplot2::theme_bw() +
+      ggplot2::theme(
+        plot.title = ggplot2::element_text(
+          hjust = 0.5
+        ),
+        plot.subtitle = ggplot2::element_text(
+          colour = "red"
+        )
+      )
+
+    print(p)
+    ans[[i]]=p
+  }
+  return(ans)
+}
 #' To obtain sub-networks of the observed network
 #'
 #' @param network An igraph object

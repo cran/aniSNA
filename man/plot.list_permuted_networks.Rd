@@ -10,6 +10,7 @@
   network_metrics_functions_list = c(edge_density = function(x) igraph::edge_density(x),
     diameter = function(x) igraph::diameter(x, weights = NA), transitivity = function(x)
     igraph::transitivity(x)),
+  nbins = 10,
   ...
 )
 }
@@ -20,6 +21,8 @@
 
 \item{network_metrics_functions_list}{A list consisting of function definitions of the network metrics that the user wants to evaluate. Each element in the list should have an assigned name.
 Default = c("edge_density" = function(x) igraph::edge_density(x), "diameter" = function(x) igraph::diameter(x, weights = NA), "transitivity" = function(x) igraph::transitivity(x))}
+
+\item{nbins}{How many bins to use for the histograms.}
 
 \item{...}{Further arguments are ignored.}
 }

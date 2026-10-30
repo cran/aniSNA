@@ -88,45 +88,54 @@ bootstrapped_difference_pvalues <- function(network,
 #' mean_pvalue_matrix <- bootstrapped_difference_pvalues(elk_network_2010, n_versions = 100)
 #' plot(mean_pvalue_matrix)
 #' }
-plot.bootstrapped_pvalue_matrix <- function(x,...){
-  
+plot.bootstrapped_pvalue_matrix <- function(x, ...) {
+
   bootstrapped_results <- x
-  
-  if(!inherits(bootstrapped_results,"bootstrapped_pvalue_matrix")){
+
+  if (!inherits(bootstrapped_results, "bootstrapped_pvalue_matrix")) {
     stop("Matrix passed is not of class 'bootstrapped_pvalue_matrix'")
   }
-  
-  subsample_size <- seq(5,5*nrow(bootstrapped_results), 5)
-  col_vec <- c("red", "blue", "green", "yellow", "black")
-  
-  plot(subsample_size, 
-         bootstrapped_results[,1], 
-         ylim = c(0, 1),
-         xlim = c(0, max(subsample_size)),
-         type = "b",
-         col = col_vec[1],
-         pch = 16,
-         xlab = "Sample Size",
-         ylab = "p - value")
-  
-  if(ncol(bootstrapped_results) > 1){
-    
-    for(i in 2:ncol(bootstrapped_results)){
-      graphics::points(subsample_size, 
-             bootstrapped_results[,i],
-             type = "b",
-             col = col_vec[i],
-             pch = 16)
-    }
-  }
-  
-  graphics::abline(h = 0.1, col = "brown")
-  graphics::legend("topleft", 
-                   legend = colnames(bootstrapped_results), 
-                   col = col_vec[1:ncol(bootstrapped_results)],
-                   pch = 16)
-  
-  
+
+  subsample_size <- seq(
+    5,
+    5 * nrow(bootstrapped_results),
+    5
+  )
+
+  plot_df <- data.frame(bootstrapped_results[,]) 
+  plot_df$SampleSize <- subsample_size
+
+  plot_df_long <- tidyr::pivot_longer(
+    plot_df,
+    cols = 1:(ncol(plot_df)-1),
+    names_to = "Metric",
+    values_to = "PValue"
+  )
+
+  p <- ggplot2::ggplot(
+    plot_df_long,
+    ggplot2::aes(
+      x = .data$SampleSize,
+      y = .data$PValue,
+      colour = .data$Metric
+    )
+  ) +
+    ggplot2::geom_line(linewidth = 1) +
+    ggplot2::geom_point(size = 2) +
+    ggplot2::geom_hline(
+      yintercept = 0.1,
+      colour = "brown",
+      linetype = "dashed"
+    ) +
+    ggplot2::scale_y_continuous(
+      limits = c(0, 1)
+    ) +
+    ggplot2::labs(
+      x = "Sample Size",
+      y = "p-value",
+      colour = "Metric"
+    ) +
+    ggplot2::theme_bw()
+
+  print(p)
 }
-
-

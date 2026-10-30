@@ -2,6 +2,7 @@
 % Please edit documentation in R/aniSNA-package.R
 \docType{package}
 \name{aniSNA}
+\alias{aniSNA-package}
 \alias{aniSNA}
 \title{aniSNA}
 \description{

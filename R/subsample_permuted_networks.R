@@ -26,7 +26,7 @@ subsampled_permuted_network_metrics <- function(networks_list,
   subsampling_result <- lapply(1:length(network_metrics_functions_list), function(i){ 
     subsampling_result[[names(network_metrics_functions_list)[i]]] <- matrix(0, length(networks_list), 
                                                                              length(subsampling_proportion), 
-                                                                             dimnames = list(as.character(c(1:length(networks_list))), as.character(subsampling_proportion*100)))
+                                                                             dimnames = list(as.character(c(1:length(networks_list))), as.character(subsampling_proportion)))
   })
   
   names(subsampling_result) <- names(network_metrics_functions_list)
@@ -85,6 +85,7 @@ plot.Subsampled_Permuted_Network_Metrics <- function(x, network,
   
   
   species_permuted_results = x
+  ans=list()
   
   if(!inherits(species_permuted_results, "Subsampled_Permuted_Network_Metrics")){
     stop("x passed is not of class 'Subsampled_Permuted_Network_Metrics'")
@@ -115,17 +116,18 @@ plot.Subsampled_Permuted_Network_Metrics <- function(x, network,
   
   for(i in 1:length(species_permuted_results)){
     
-    plot_metrics <- ggplot2::ggplot(species_long[[names(species_permuted_results)[i]]], ggplot2::aes(x=variable, y=value, fill=category)) +
+    plot_metrics <- ggplot2::ggplot(species_long[[names(species_permuted_results)[i]]], ggplot2::aes(x=.data$variable, y=.data$value, fill=.data$category)) +
       ggplot2::geom_boxplot()+ 
       ggplot2::geom_hline(yintercept =  network_metrics_functions_list[[names(species_permuted_results)[i]]](network), color = "red", linetype = "dashed") +
       ggplot2::theme(legend.position=c(0.8, 0.9), legend.title = ggplot2::element_blank(),
                      plot.title = ggplot2::element_text(size = 10,hjust = 0.5, face="bold"),
                      axis.title=ggplot2::element_text(size=9)) +
       ggplot2::ggtitle(names(species_permuted_results)[i])+
-      ggplot2::ylab("Value") + ggplot2::xlab("Sub-sample size (in %)")+
+      ggplot2::ylab("Value") + ggplot2::xlab("sub-sample proportion")+
       ggplot2::scale_fill_manual(values=c("orange", "skyblue"))
     
     print(plot_metrics)
-    
+    ans[[i]]=plot_metrics
   }              
+  return(ans)
 }

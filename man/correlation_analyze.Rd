@@ -8,12 +8,12 @@ correlation_analyze(
   network,
   n_simulations = 10,
   subsampling_proportion = c(0.1, 0.3, 0.5, 0.7, 0.9),
-  network_metrics_functions_list = c(degree = function(net, sub_net) igraph::degree(net,
-    v = igraph::V(sub_net)$name), strength = function(net, sub_net) igraph::strength(net,
-    v = igraph::V(sub_net)$name), betweenness = function(net, sub_net)
-    igraph::betweenness(net, v = igraph::V(sub_net)$name), clustering_coefficient =
-    function(net, sub_net) igraph::transitivity(net, type = "local", vids =
-    igraph::V(sub_net)$name), eigenvector_centrality = function(net, sub_net)
+  network_metrics_functions_list = c(degree = function(net, sub_net)
+    igraph::degree(net)[igraph::V(sub_net)$name], strength = function(net, sub_net)
+    igraph::strength(net)[igraph::V(sub_net)$name], betweenness = function(net, sub_net)
+    igraph::betweenness(net)[igraph::V(sub_net)$name], clustering_coefficient =
+    function(net, sub_net) igraph::transitivity(net, type =
+    "local")[igraph::V(sub_net)$name], eigenvector_centrality = function(net, sub_net)
     igraph::eigen_centrality(net)$vector[igraph::V(sub_net)$name])
 )
 }
@@ -26,10 +26,10 @@ correlation_analyze(
 
 \item{network_metrics_functions_list}{A list consisting of function definitions of the network metrics that the user wants to evaluate. Each element in the list should have an assigned name. Each function 
 definition should include two parameters, one for the main network and another one for the subnetwork. See default example.
- Default = c("degree" = function(net, sub_net) igraph::degree(net, v = igraph::V(sub_net)$name),
- "strength" = function(net, sub_net) igraph::strength(net, v = igraph::V(sub_net)$name),
- "betweenness" = function(net, sub_net) igraph::betweenness(net, v = igraph::V(sub_net)$name),
- "clustering_coefficient" = function(net, sub_net) igraph::transitivity(net, type = "local", vids = igraph::V(sub_net)$name),
+ Default = c("degree" = function(net, sub_net) igraph::degree(net)[igraph::V(sub_net)$name],
+ "strength" = function(net, sub_net) igraph::strength(net)[igraph::V(sub_net)$name],
+ "betweenness" = function(net, sub_net) igraph::betweenness(net)[igraph::V(sub_net)$name],
+ "clustering_coefficient" = function(net, sub_net) igraph::transitivity(net, type = "local")[igraph::V(sub_net)$name],
  "eigenvector_centrality" = function(net, sub_net) igraph::eigen_centrality(net)$vector[igraph::V(sub_net)$name])}
 }
 \value{

@@ -4,12 +4,27 @@
 \alias{plot_network}
 \title{Visualize Animal Network}
 \usage{
-plot_network(species_network, seed = 1)
+plot_network(
+  species_network,
+  seed = 1,
+  size = 7,
+  fill = "white",
+  colour = "black",
+  ...
+)
 }
 \arguments{
 \item{species_network}{An igraph graph object consisting of observed network.}
 
 \item{seed}{Seed to be set for layout.}
+
+\item{size}{Size of the nodes in the network plot.}
+
+\item{fill}{Colour for the nodes in the network plot.}
+
+\item{colour}{Colour for the edges in the network plot.}
+
+\item{...}{Further arguments are ignored.}
 }
 \value{
 No return value, called for side effects. The plots depict a visualisation of network structure.

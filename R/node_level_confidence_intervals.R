@@ -36,7 +36,7 @@ node_level_CI <- function(network,
                                                                     "strength" = igraph::strength , 
                                                                     "betweenness" = igraph::betweenness, 
                                                                     "clustering_coefficient" = function(x){
-                                                                      trans <- igraph::transitivity(x, type = "local", vids = igraph::V(x) ,isolates = "zero");
+                                                                      trans <- igraph::transitivity(x, type = "local", isolates = "zero")[igraph::V(x)];
                                                                       names(trans) <- igraph::V(x)$name;
                                                                       return(trans)
                                                                     },
@@ -69,6 +69,7 @@ node_level_CI <- function(network,
 #' To plot the results for node-level confidence intervals
 #'
 #' @param x A list of dataframes obtained from node_level_CI function.
+#' @param num.show How many individuals to label on the x-axis. 
 #' @param ... Further arguments are ignored.
 #'
 #' @return No return value, called for side effects. 
@@ -83,45 +84,55 @@ node_level_CI <- function(network,
 #' elk_node_level_CI <- node_level_CI(elk_network_2010)
 #' plot(elk_node_level_CI)
 #' }
-plot.list_node_level_CI <- function(x,...){
+plot.list_node_level_CI <- function(x, num.show=30, ...) {
+
   node_level_all_metrics <- x
-  
-  if(!inherits(node_level_all_metrics,"list_node_level_CI")){
+
+  if (!inherits(node_level_all_metrics, "list_node_level_CI")) {
     stop("List passed is not of class 'list_node_level_CI'")
   }
-  
-  for(j in 1:length(node_level_all_metrics)){
-    if(max(node_level_all_metrics[[j]]$metric_value, node_level_all_metrics[[j]]$upper_CI) < 1){
-      max_limit <- seq(0,max(node_level_all_metrics[[j]]$metric_value, node_level_all_metrics[[j]]$upper_CI), length.out = 5)
-    }else max_limit <- 0:max(node_level_all_metrics[[j]]$metric_value, node_level_all_metrics[[j]]$upper_CI)
-    
-    # Create plotrix plot with confidence intervals
-    plot(node_level_all_metrics[[j]]$metric_value, 
-         xaxt="n", 
-         yaxt ="n",
-         type = 'n',
-         xlab = "Node Number",
-         ylab = "Value",
-         ylim = c(min(node_level_all_metrics[[j]]$metric_value, node_level_all_metrics[[j]]$lower_CI), max(node_level_all_metrics[[j]]$metric_value, node_level_all_metrics[[j]]$upper_CI)),
-         xlim = c(1, length(node_level_all_metrics[[j]]$node_number)),
-         main = names(node_level_all_metrics)[[j]])
-    
-    graphics::abline(h =  pretty(max_limit), 
-                     v = 1:length(node_level_all_metrics[[j]]$node_number), lty = 1, col = "grey89")
-    
-    plotrix::plotCI(x = 1:length(node_level_all_metrics[[j]]$node_number),
-                    y = node_level_all_metrics[[j]]$metric_value,
-                    li =node_level_all_metrics[[j]]$lower_CI,
-                    ui = node_level_all_metrics[[j]]$upper_CI, 
-                    scol = "black", 
-                    add = TRUE)
-    graphics::points(node_level_all_metrics[[j]]$metric_value, pch=19, col = "orange", cex = 0.7)
-    graphics::axis(side = 2, at=pretty(max_limit), las=2)
-    graphics::axis(side = 1, at=1:length(node_level_all_metrics[[j]]$node_number), 
-                   labels=node_level_all_metrics[[j]]$node_number, las=2, tick = TRUE, cex.axis = 0.85)
+
+  ans=list()
+  for (j in seq_along(node_level_all_metrics)) {
+
+    plot_df <- node_level_all_metrics[[j]]
+    ss=seq.int(1, nrow(plot_df), by=as.integer(nrow(plot_df)/num.show))
+
+    p <- ggplot2::ggplot(
+      plot_df,
+      ggplot2::aes(
+        x = 1:nrow(plot_df), # use this instead of factor(node_number) as ggplot will reorder otherwise
+        y = .data$metric_value
+      )
+    ) +
+      ggplot2::geom_errorbar(
+        ggplot2::aes(
+          ymin = .data$lower_CI,
+          ymax = .data$upper_CI
+        ),
+        width = 0.2,
+        colour = "black"
+      ) +
+      ggplot2::geom_point(
+        colour = "orange",
+        size = 2
+      ) +
+      ggplot2::labs(
+        title = names(node_level_all_metrics)[j],
+        x = "Node Number",
+        y = "Value"
+      ) +
+      ggplot2::theme_bw() +
+      ggplot2::theme(
+        axis.text.x = ggplot2::element_text(
+          angle = 90,
+          vjust = 0.5,
+          hjust = 1
+        )
+      ) + ggplot2::scale_x_continuous(breaks=ss,labels=plot_df$node_number[ss])
+
+    print(p)
+    ans[[j]]=p
   }
+  return(ans)
 }
-
-
-
-

@@ -48,7 +48,9 @@ obtain_permuted_network_versions <- function(species_raw, temporal_thresh, spati
 #' @param species_original_network An igraph object which is the original network
 #' @param network_metrics_functions_list A list consisting of function definitions of the network metrics that the user wants to evaluate. Each element in the list should have an assigned name.
 #'  Default = c("edge_density" = function(x) igraph::edge_density(x), "diameter" = function(x) igraph::diameter(x, weights = NA), "transitivity" = function(x) igraph::transitivity(x))
+#' @param nbins How many bins to use for the histograms.
 #'
+#' @param nbins number of bins for histogram.
 #' @param ... Further arguments are ignored.
 #'
 #' @return No return value, called for side effects.
@@ -64,26 +66,65 @@ obtain_permuted_network_versions <- function(species_raw, temporal_thresh, spati
 #' temporal_thresh = 7, spatial_thresh = 15, n_permutations = 10, n_cores = 2)
 #' plot(permuted_versions, elk_network_2010)
 #' }
-plot.list_permuted_networks <- function(x, 
-                                        species_original_network,
-                                        network_metrics_functions_list = c("edge_density" = function(x) igraph::edge_density(x),
-                                                                           "diameter" = function(x) igraph::diameter(x, weights = NA),
-                                                                           "transitivity" = function(x) igraph::transitivity(x)),
-                                        ...){
+plot.list_permuted_networks <- function(
+  x,
+  species_original_network,
+  network_metrics_functions_list = c(
+    "edge_density" = function(x) igraph::edge_density(x),
+    "diameter" = function(x) igraph::diameter(x, weights = NA),
+    "transitivity" = function(x) igraph::transitivity(x)
+  ), nbins=10,
+  ...
+) {
+
   networks_list <- x
-  
-  if(!inherits(networks_list, "list_permuted_networks")){
+  ans=list()
+
+  if (!inherits(networks_list, "list_permuted_networks")) {
     stop("List passed is not of class 'list_permuted_networks'")
   }
-  
-  j <-1
-  for(f in network_metrics_functions_list){
-    permutations_metric <- unlist(lapply(networks_list, function(i) f(i)))
-    graphics::hist(permutations_metric, 
-         main = paste0(names(network_metrics_functions_list)[j]," distribution"), xlab = "Metric values (Permuted versions)")
-    graphics::mtext(paste("Observed value : ", 
-                          round(f(species_original_network),5), sep = ""), 
-                    side = 3 , col = "red", cex = 0.8)
-    j <- j +1
+
+  j <- 1
+
+  for (f in network_metrics_functions_list) {
+
+    permutations_metric <- unlist(
+      lapply(networks_list, function(i) f(i))
+    )
+
+    observed_value <- f(species_original_network)
+
+    plot_df <- data.frame(
+      MetricValue = permutations_metric
+    )
+
+    p <- ggplot2::ggplot(
+      plot_df,
+      ggplot2::aes(x = .data$MetricValue)
+    ) +
+      ggplot2::geom_histogram(
+        bins = nbins,
+        fill = "grey70",
+        colour = "black"
+      ) +
+      ggplot2::labs(
+        title = paste0(
+          names(network_metrics_functions_list)[j],
+          " distribution"
+        ),
+        subtitle = paste0(
+          "Observed value: ",
+          round(observed_value, 5)
+        ),
+        x = "Metric values (Permuted versions)",
+        y = "Count"
+      ) +
+      ggplot2::theme_bw()
+
+    print(p)
+    ans[[j]]=p
+
+    j <- j + 1
   }
+  return(ans)
 }

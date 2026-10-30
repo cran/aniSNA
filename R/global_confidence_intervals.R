@@ -81,26 +81,51 @@ global_width_CI <- function(network,
 #' width_CI_elk <- global_width_CI(elk_network_2010, n_versions = 100)
 #' plot(width_CI_elk)
 #' }
-plot.Width_CI_matrix <- function(x,...){
-  
+plot.Width_CI_matrix <- function(x, ...) {
+
   width_CI_results <- x
-  
-  if(!inherits(width_CI_results,"Width_CI_matrix")){
+  ans=list()
+
+  if (!inherits(width_CI_results, "Width_CI_matrix")) {
     stop("Matrix passed is not of class 'Width_CI_matrix'")
   }
-  
-  width_CI_results <- as.data.frame(do.call(cbind, width_CI_results))
-    
-  for(i in 2:ncol(width_CI_results)){
-      plot(width_CI_results$sample_size_values, 
-           width_CI_results[,i], 
-           type = "b",
-           col = "black",
-           main = colnames(width_CI_results)[i],
-           pch = 16,
-           xlab = "Sample Size",
-           ylab = "Width of Confidence Interval")
+
+  width_CI_results <- as.data.frame(
+    do.call(cbind, width_CI_results)
+  )
+
+  for (i in 2:ncol(width_CI_results)) {
+
+    plot_df <- data.frame(
+      sample_size = width_CI_results$sample_size_values,
+      ci_width = width_CI_results[, i]
+    )
+    p <- ggplot2::ggplot(
+      plot_df,
+      ggplot2::aes(
+        x = .data$sample_size,
+        y = .data$ci_width
+      )
+    ) +
+      ggplot2::geom_line(
+        colour = "black",
+        linewidth = 0.8
+      ) +
+      ggplot2::geom_point(
+        colour = "black",
+        size = 2
+      ) +
+      ggplot2::labs(
+        title = colnames(width_CI_results)[i],
+        x = "Sample Size",
+        y = "Width of Confidence Interval"
+      ) +
+      ggplot2::theme_bw()
+
+    print(p)
+    ans[[i-1]]=p
   }
+  return(ans)
 }
 
 
